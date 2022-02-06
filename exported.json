@@ -1,0 +1,62 @@
+{
+    "drawflow": {
+        "Home": {
+            "data": {
+                "1": {
+                    "id": 1,
+                    "name": "github",
+                    "data": {},
+                    "class": "github",
+                    "html": {},
+                    "typenode": true,
+                    "inputs": {
+                        "input_1": {
+                            "connections": []
+                        }
+                    },
+                    "outputs": {
+                        "output_1": {
+                            "connections": [
+                                {
+                                    "node": "2",
+                                    "output": "input_1"
+                                }
+                            ]
+                        }
+                    },
+                    "pos_x": 317,
+                    "pos_y": 113
+                },
+                "2": {
+                    "id": 2,
+                    "name": "slack",
+                    "data": {},
+                    "class": "slack",
+                    "html": {},
+                    "typenode": true,
+                    "inputs": {
+                        "input_1": {
+                            "connections": [
+                                {
+                                    "node": "1",
+                                    "input": "output_1"
+                                }
+                            ]
+                        }
+                    },
+                    "outputs": {
+                        "output_1": {
+                            "connections": []
+                        }
+                    },
+                    "pos_x": 372,
+                    "pos_y": 224
+                }
+            }
+        },
+        "Other": {
+            "data": {}
+        }
+    }
+}
+

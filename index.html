@@ -7,16 +7,17 @@
   <title>Drawflow</title>
 </head>
 <body>
-  <script src="drawflow.min.js"></script>
+  <script src="src/drawflow.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>
   <link rel="stylesheet" type="text/css" href="src/drawflow.css" />
   <link rel="stylesheet" type="text/css" href="docs/beautiful.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.13.1/css/alertify.min.css" integrity="sha512-IXuoq1aFd2wXs4NqGskwX2Vb+I8UJ+tGJEu/Dc0zwLNKeQ7CW3Sr6v0yU3z5OQWe3eScVIkER4J9L7byrgR/fA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
   <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
-
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js" integrity="sha512-6ts6Fu561/yzWvD6uwQp3XVYwiWNpWnZ0hdeQrETqtnQiGjTfOS06W76aUDnq51hl1SxXtJaqy7IsZ3oP/uZEg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.13.1/alertify.min.js" integrity="sha512-JnjG+Wt53GspUQXQhc+c4j8SBERsgJAoHeehagKHlxQN+MtCCmFDghX9/AcbkkNRZptyZU4zC8utK59M5L45Iw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <header>
     <h2>Drawflow</h2>
     <div class="github-link"><a href="https://github.com/jerosoler/Drawflow" target="_blank"><i class="fab fa-github fa-3x"></i></a></div>
@@ -70,10 +71,11 @@
         </ul>
       </div>
       <div id="drawflow" ondrop="drop(event)" ondragover="allowDrop(event)">
-
-        <div class="btn-export" onclick="Swal.fire({ title: 'Export',
+       <div class="dvCodeEditor"> <pre id="codeEditor"></pre></div>
+        <div class="btn-export" onclick="editor.exportToCodeEditor()">Export</div>
+        <!-- <div class="btn-export" onclick="Swal.fire({ title: 'Export',
         html: '<pre><code>'+JSON.stringify(editor.export(), null,4)+'</code></pre>'
-        })">Export</div>
+        })">Export</div> -->
         <div class="btn-clear" onclick="editor.clearModuleSelected()">Clear</div>
         <div class="btn-lock">
           <i id="lock" class="fas fa-lock" onclick="editor.editor_mode='fixed'; changeMode('lock');"></i>
@@ -153,6 +155,11 @@
       console.log("Node created " + id);
     })
 
+    //This is to test how the dispatch, listener works
+    editor.on('nodeCreated', function(id) {
+      console.log("2nd Listener for nodeCreated Event, Node created " + id);
+    })
+
     editor.on('nodeRemoved', function(id) {
       console.log("Node removed " + id);
     })
@@ -223,7 +230,10 @@
       ev.preventDefault();
     }
 
+    var dragingNode;
     function drag(ev) {
+      dragingNode = ev.target;
+      console.log("Drag ev data " + ev.target.getAttribute('data-node'));
       if (ev.type === "touchstart") {
         mobile_item_selec = ev.target.closest(".drag-drawflow").getAttribute('data-node');
       } else {
@@ -241,159 +251,20 @@
       } else {
         ev.preventDefault();
         var data = ev.dataTransfer.getData("node");
-        addNodeToDrawFlow(data, ev.clientX, ev.clientY);
+        addNodeToDrawFlow(dragingNode, data, ev.clientX, ev.clientY);
       }
 
     }
 
-    function addNodeToDrawFlow(name, pos_x, pos_y) {
+    function addNodeToDrawFlow(draggigNode, name, pos_x, pos_y) {
       if(editor.editor_mode === 'fixed') {
         return false;
       }
       pos_x = pos_x * ( editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)) - (editor.precanvas.getBoundingClientRect().x * ( editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)));
       pos_y = pos_y * ( editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)) - (editor.precanvas.getBoundingClientRect().y * ( editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)));
 
-
-      switch (name) {
-        case 'facebook':
-        var facebook = `
-        <div>
-          <div class="title-box"><i class="fab fa-facebook"></i> Facebook Message</div>
-        </div>
-        `;
-          editor.addNode('facebook', 0,  1, pos_x, pos_y, 'facebook', {}, facebook );
-          break;
-        case 'slack':
-          var slackchat = `
-          <div>
-            <div class="title-box"><i class="fab fa-slack"></i> Slack chat message</div>
-          </div>
-          `
-          editor.addNode('slack', 1, 0, pos_x, pos_y, 'slack', {}, slackchat );
-          break;
-        case 'github':
-          var githubtemplate = `
-          <div>
-            <div class="title-box"><i class="fab fa-github "></i> Github Stars</div>
-            <div class="box">
-              <p>Enter repository url</p>
-            <input type="text" df-name>
-            </div>
-          </div>
-          `;
-          editor.addNode('github', 0, 1, pos_x, pos_y, 'github', { "name": ''}, githubtemplate );
-          break;
-        case 'telegram':
-          var telegrambot = `
-          <div>
-            <div class="title-box"><i class="fab fa-telegram-plane"></i> Telegram bot</div>
-            <div class="box">
-              <p>Send to telegram</p>
-              <p>select channel</p>
-              <select df-channel>
-                <option value="channel_1">Channel 1</option>
-                <option value="channel_2">Channel 2</option>
-                <option value="channel_3">Channel 3</option>
-                <option value="channel_4">Channel 4</option>
-              </select>
-            </div>
-          </div>
-          `;
-          editor.addNode('telegram', 1, 0, pos_x, pos_y, 'telegram', { "channel": 'channel_3'}, telegrambot );
-          break;
-        case 'aws':
-          var aws = `
-          <div>
-            <div class="title-box"><i class="fab fa-aws"></i> Aws Save </div>
-            <div class="box">
-              <p>Save in aws</p>
-              <input type="text" df-db-dbname placeholder="DB name"><br><br>
-              <input type="text" df-db-key placeholder="DB key">
-              <p>Output Log</p>
-            </div>
-          </div>
-          `;
-          editor.addNode('aws', 1, 1, pos_x, pos_y, 'aws', { "db": { "dbname": '', "key": '' }}, aws );
-          break;
-        case 'log':
-            var log = `
-            <div>
-              <div class="title-box"><i class="fas fa-file-signature"></i> Save log file </div>
-            </div>
-            `;
-            editor.addNode('log', 1, 0, pos_x, pos_y, 'log', {}, log );
-            break;
-          case 'google':
-            var google = `
-            <div>
-              <div class="title-box"><i class="fab fa-google-drive"></i> Google Drive save </div>
-            </div>
-            `;
-            editor.addNode('google', 1, 0, pos_x, pos_y, 'google', {}, google );
-            break;
-          case 'email':
-            var email = `
-            <div>
-              <div class="title-box"><i class="fas fa-at"></i> Send Email </div>
-            </div>
-            `;
-            editor.addNode('email', 1, 0, pos_x, pos_y, 'email', {}, email );
-            break;
-
-          case 'template':
-            var template = `
-            <div>
-              <div class="title-box"><i class="fas fa-code"></i> Template</div>
-              <div class="box">
-                Ger Vars
-                <textarea df-template></textarea>
-                Output template with vars
-              </div>
-            </div>
-            `;
-            editor.addNode('template', 1, 1, pos_x, pos_y, 'template', { "template": 'Write your template'}, template );
-            break;
-          case 'multiple':
-            var multiple = `
-            <div>
-              <div class="box">
-                Multiple!
-              </div>
-            </div>
-            `;
-            editor.addNode('multiple', 3, 4, pos_x, pos_y, 'multiple', {}, multiple );
-            break;
-          case 'personalized':
-            var personalized = `
-            <div>
-              Personalized
-            </div>
-            `;
-            editor.addNode('personalized', 1, 1, pos_x, pos_y, 'personalized', {}, personalized );
-            break;
-          case 'dbclick':
-            var dbclick = `
-            <div>
-            <div class="title-box"><i class="fas fa-mouse"></i> Db Click</div>
-              <div class="box dbclickbox" ondblclick="showpopup(event)">
-                Db Click here
-                <div class="modal" style="display:none">
-                  <div class="modal-content">
-                    <span class="close" onclick="closemodal(event)">&times;</span>
-                    Change your variable {name} !
-                    <input type="text" df-name>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-            `;
-            editor.addNode('dbclick', 1, 1, pos_x, pos_y, 'dbclick', { name: ''}, dbclick );
-            break;
-
-        default:
-      }
-    }
+      editor.addNode(name, 1,  1, pos_x, pos_y, name, {}, draggigNode, true);
+  }
 
   var transform = '';
   function showpopup(e) {
@@ -445,6 +316,6 @@
 
     }
 
-  </script>
+</script>
 </body>
 </html>
