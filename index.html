@@ -262,8 +262,10 @@
       }
       pos_x = pos_x * ( editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)) - (editor.precanvas.getBoundingClientRect().x * ( editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom)));
       pos_y = pos_y * ( editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)) - (editor.precanvas.getBoundingClientRect().y * ( editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom)));
-
-      editor.addNode(name, 1,  1, pos_x, pos_y, name, {}, draggigNode, true);
+      let clonedNode = draggigNode.cloneNode(true);
+      editor.removeAttributes(clonedNode);
+      editor.registerNode(name, clonedNode);
+      editor.addNode(name, 1,  1, pos_x, pos_y, name, {}, name, true);
   }
 
   var transform = '';
