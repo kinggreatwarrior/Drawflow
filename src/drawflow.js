@@ -2714,7 +2714,26 @@ class Drawflow {
     this.zoom = 1;
     this.zoom_last_value = 1;
     this.precanvas.style.transform = "";
+    document.getElementById("drawflow").style.display = "flex"; 
+    document.querySelector(".codeEditor").style.display = "none"; 
     this.import(this.drawflow, false);
+  }
+
+  loadCodeEditorModule(name) {
+    this.dispatch("moduleChanged", name);
+    this.module = name;
+    this.precanvas.innerHTML = "";
+    this.canvas_x = 0;
+    this.canvas_y = 0;
+    this.pos_x = 0;
+    this.pos_y = 0;
+    this.mouse_x = 0;
+    this.mouse_y = 0;
+    this.zoom = 1;
+    this.zoom_last_value = 1;
+    this.precanvas.style.transform = "";
+    document.getElementById("drawflow").style.display = "none"; 
+    this.exportToCodeEditor(name);
   }
 
   removeModule(name) {
@@ -2735,15 +2754,27 @@ class Drawflow {
     this.drawflow = { drawflow: { Home: { data: {} } } };
   }
 
-  initAceEditor() {
+  getEleOffset(el) {
+    var rect = el.getBoundingClientRect(),
+    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    return { top: rect.top + scrollTop, left: rect.left + scrollLeft, bottom: rect.bottom, right: rect.right, width: rect.width, height: rect.height }
+}
+
+  initAceEditor(aceEditorId) {
+    if(document.querySelector("."+aceEditorId))
+      document.querySelector("."+aceEditorId).style.display = "block";
+      this.ace_editor = null;
     if (!this.ace_editor) {
-      this.ace_editor = ace.edit("codeEditor");
-      this.ace_editor.setTheme("ace/theme/twilight");
-      this.ace_editor.session.setMode("ace/mode/json");
+      this.ace_editor = ace.edit(aceEditorId);
+      this.ace_editor.setTheme("ace/theme/dracula");
+      this.ace_editor.session.setMode("ace/mode/java");
       this.ace_editor.setOptions({
         autoScrollEditorIntoView: true,
       });
+      //this.ace_editor.resize();
     }
+    document.getElementById(aceEditorId).style.top = this.getEleOffset(document.querySelector('.menu')).bottom-12+'px';
   }
 
   export() {
@@ -2752,15 +2783,17 @@ class Drawflow {
     return dataExport;
   }
 
-  exportToCodeEditor() {
-    this.initAceEditor();
+  exportToCodeEditor(aceEditorId, showModel = false) {
+    this.initAceEditor(aceEditorId);
     this.ace_editor.session.setValue(JSON.stringify(this.export(), null, 4));
+    if(showModel === true){
     alertify
       .alert()
       .setHeader("Code Editor")
-      .setContent(document.getElementById("codeEditor"))
+      .setContent(document.getElementById(aceEditorId))
       .set({ startMaximized: true, transition: "fade" })
       .show();
+    }
   }
 
   import(data, notifi = true) {

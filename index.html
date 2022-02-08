@@ -68,11 +68,14 @@
         <ul>
           <li onclick="editor.changeModule('Home'); changeModule(event);" class="selected">Home</li>
           <li onclick="editor.changeModule('Other'); changeModule(event);">Other Module</li>
+          <li onclick="editor.loadCodeEditorModule('codeEditor')">CodeEditor
+          </li>
         </ul>
       </div>
+      <div class="codeEditor" style="display:none;"><pre id="codeEditor"></pre></div>
       <div id="drawflow" ondrop="drop(event)" ondragover="allowDrop(event)">
-       <div class="dvCodeEditor"> <pre id="codeEditor"></pre></div>
-        <div class="btn-export" onclick="editor.exportToCodeEditor()">Export</div>
+       <!-- <div class="dvCodeEditor"> <pre id="codeEditor"></pre></div> -->
+        <div class="btn-export" onclick="editor.exportToCodeEditor('codeEditor', true)">Export</div>
         <!-- <div class="btn-export" onclick="Swal.fire({ title: 'Export',
         html: '<pre><code>'+JSON.stringify(editor.export(), null,4)+'</code></pre>'
         })">Export</div> -->
